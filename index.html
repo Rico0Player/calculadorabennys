@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Oficina Bennys — v4 Final (Pedidos + Parcerias)</title>
+<style>
+  /* Font */
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+  /* Core color variables (will be updated to purple theme when admin toggles) */
+  :root{
+    --bg1:#030615; --bg2:#071428;
+    --accent1:#2e8bff; --accent2:#00e6a8;
+    --sport:#ffcc00; --old:#ff9f6b; --bike:#6bb7ff;
+    --yellow: #f0b429; --green: #00e6a8;
+    --muted: rgba(255,255,255,0.6);
+    --neon-glow: rgba(46,139,255,0.14);
+  }
+
+  /* Purple theme variables (applied by JS toggling a class on <body>) */
+  body.purple-theme {
+    --accent1: #a000ff;
+    --accent2: #c68bff;
+    --neon-glow: rgba(160,0,255,0.16);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family:'Poppins',sans-serif;
+    background:
+      radial-gradient(900px 500px at 10% 10%, rgba(46,139,255,0.06),transparent),
+      linear-gradient(180deg,var(--bg1),var(--bg2));
+    color:#eaf6ff; display:flex; align-items:center; justify-content:center; padding:28px;
+  }
+
+  .app{width:100%;max-width:1100px;position:relative}
+  .header{
+    position:fixed;left:50%;transform:translateX(-50%);top:12px;
+    background:linear-gradient(90deg,rgba(46,139,255,0.12),rgba(0,198,255,0.06));
+    padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);
+    backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);
+    font-weight:700;color:var(--accent1);display:flex;gap:14px;align-items:center;z-index:40;
+    transition:box-shadow .3s, background .3s;
+  }
+  .logo{font-size:18px}
+  .tabs{display:flex;gap:8px}
+  .tab{padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600;color:#cfe9ff}
+  .tab.active{background:linear-gradient(90deg,var(--accent1),#1a6ed8);box-shadow:0 8px 22px var(--neon-glow)}
+
+  .card{margin-top:72px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:18px;border-radius:14px;box-shadow:0 20px 60px rgba(2,6,23,0.6);overflow:hidden;transition:transform .18s}
+  .card:hover{transform:translateY(-3px)}
+
+  .controls{display:flex;gap:12px;align-items:center}
+  .search{flex:1}
+  .search input{width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.04);outline:none;color:#fff}
+  .search input::placeholder{color:rgba(255,255,255,0.6)}
+
+  .grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:12px}
+  @media(max-width:1000px){ .grid{grid-template-columns:1fr} .header{left:12px;transform:none} .card{margin-top:110px} }
+
+  .left{min-height:420px}
+  .right{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.03);display:flex;flex-direction:column;gap:12px}
+
+  .lista{display:flex;flex-direction:column;gap:10px;max-height:520px;overflow:auto;padding-right:6px}
+
+  .item{display:grid;grid-template-columns:1fr 160px 120px;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03)}
+  .item .name{font-weight:700;color:#fff}
+  .item .meta{display:flex;align-items:center;gap:8px;justify-content:center}
+  .qty{display:flex;align-items:center;gap:8px}
+  .qty button{width:34px;height:34px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px var(--neon-glow);transition:transform .12s;}
+  .qty button:active{transform:scale(.96)}
+  .qty .num{min-width:30px;text-align:center;font-weight:800;color:#fff}
+  .price{font-weight:800;text-align:right;color:var(--accent2)}
+
+  .section-title{font-weight:800;margin:8px 0;color:var(--accent1)}
+  .small-muted{font-size:13px;color:rgba(255,255,255,0.6)}
+
+  .total{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:linear-gradient(90deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03)}
+  .total .label{font-weight:700;color:var(--accent1)}
+  .total .value{font-weight:900;color:var(--accent2);font-size:1.5rem;transition:color .2s}
+
+  .btn{padding:10px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;font-weight:700;cursor:pointer;box-shadow:0 10px 20px var(--neon-glow)}
+  .action-btn{padding:8px 10px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:#fff;font-weight:700;cursor:pointer;min-width:110px}
+  .action-btn.small{padding:6px 8px;min-width:90px}
+  .action-btn.danger{background:#ff6b6b}
+  .action-btn.ghost{background:rgba(255,255,255,0.04);color:#fff;border:1px solid rgba(255,255,255,0.06);}
+
+  .admin-panel{display:flex;flex-direction:column;gap:10px}
+  .input{padding:9px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);outline:none;color:#fff}
+  .input::placeholder{color:rgba(255,255,255,0.6)}
+
+  /* ensure select is readable */
+  select.input{background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); color:#fff; border-radius:8px; padding:9px; border:1px solid rgba(255,255,255,0.04); appearance:none}
+  select.input option{background:#071428; color:#fff}
+
+  /* sparkles / neon animations */
+  .sparkles{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;z-index:2}
+  .spark{position:absolute;width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,var(--accent1),var(--accent2));filter:blur(6px);opacity:.06;animation: floaty 6s linear infinite}
+  @keyframes floaty{0%{transform:translateY(0) translateX(0) scale(.9)}25%{transform:translateY(-24px) translateX(10px) scale(1)}50%{transform:translateY(-60px) translateX(20px) scale(.9)}75%{transform:translateY(-24px) translateX(10px) scale(1)}100%{transform:translateY(0) translateX(0) scale(.9)}}
+
+  /* subtle neon border pulse for cards */
+  .card::after{
+    content:"";position:absolute;inset:auto 18px 18px 18px;border-radius:12px;
+    box-shadow:0 0 40px 6px rgba(46,139,255,0.02);pointer-events:none;transition:box-shadow .4s;
+  }
+  body.purple-theme .card::after{ box-shadow:0 0 60px 10px rgba(160,0,255,0.03); }
+
+  /* Orders compact */
+  .order{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);height:auto}
+  .order .left{display:flex;flex-direction:column;gap:6px}
+  .order .meta{font-size:13px;color:rgba(255,255,255,0.85)}
+  .order .actions{display:flex;gap:8px;align-items:center}
+  .tag{padding:6px 10px;border-radius:8px;font-weight:800;min-width:110px;text-align:center}
+  .tag.process{background:rgba(240,180,41,0.12);color:var(--yellow);font-weight:800}
+  .tag.done{background:rgba(0,230,168,0.08);color:var(--green);font-weight:800}
+
+  .partnerCard{display:flex;align-items:center;gap:12px;background:linear-gradient(90deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));padding:12px;border-radius:10px;margin:8px 0;border:1px solid rgba(255,255,255,0.03)}
+  .partnerCard img{width:60px;height:60px;border-radius:8px;object-fit:cover}
+
+  .toast{position:fixed;right:22px;bottom:22px;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px var(--neon-glow);transform:translateY(12px);opacity:0;transition:opacity .28s, transform .28s;z-index:999}
+  .toast.show{opacity:1;transform:none}
+
+  option{color:#fff}
+</style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <div class="logo">🛠 Oficina Bennys</div>
+      <div class="tabs" role="tablist">
+        <div class="tab active" id="tabCalc">Calculadora</div>
+        <div class="tab" id="tabVehicles">Veículos</div>
+        <div class="tab" id="tabOrders">Pedidos</div>
+        <div class="tab" id="tabPartners">Parcerias</div>
+        <div class="tab" id="tabAdmin">Admin</div>
+      </div>
+    </div>
+
+    <div class="card" id="mainCard">
+      <div class="controls">
+        <div class="search"><input id="search" placeholder="🔎 Buscar (nome ou parte)..."></div>
+        <div><button class="btn" id="btnSort">Ordenar: Preço ↓</button></div>
+      </div>
+
+      <div class="grid">
+        <div class="left">
+          <!-- Calculadora -->
+          <div id="areaCalc">
+            <div class="section-title">Produtos & Serviços</div>
+            <div class="small-muted">Adicione quantidades dos itens (clicar + / -). Total e itens adicionados aparecem à direita.</div>
+            <div class="lista" id="lista"></div>
+          </div>
+
+          <!-- Veículos -->
+          <div id="areaVehicles" style="display:none">
+            <div class="section-title">Veículos — Vendas</div>
+            <div class="small-muted">Esportivos em cima, Antigos embaixo, Motos por último. Calcula mecânica (30% por você) e parte Bennys.</div>
+            <div style="height:8px"></div>
+            <div class="lista" id="listaVehicles"></div>
+            <div style="height:8px"></div>
+            <div class="total" style="margin-top:8px">
+              <div class="label">Total (vendas)</div>
+              <div class="value" id="vehiclesTotal">R$ 0,00</div>
+            </div>
+            <div class="total" style="margin-top:8px">
+              <div class="label">Parte da Mecânica (30%)</div>
+              <div class="value" id="vehiclesShare">R$ 0,00</div>
+            </div>
+          </div>
+
+          <!-- Pedidos -->
+          <div id="areaOrders" style="display:none">
+            <div class="section-title">Pedidos de Veículos</div>
+
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+              <input id="sellerName" class="input" placeholder="Seu nome (vendedor)" style="flex:1">
+              <input id="sellerPass" type="password" class="input" placeholder="Senha do vendedor" style="flex:1">
+              <button class="btn" id="btnSellerLogin">Entrar como Vendedor</button>
+              <button class="action-btn danger" id="btnSellerLogout" style="display:none">Sair</button>
+            </div>
+            <div id="sellerInfo" class="small-muted">Não logado como vendedor.</div>
+
+            <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.04);margin:10px 0">
+
+            <div id="orderFormWrap">
+              <div style="display:flex;gap:8px;margin-bottom:8px">
+                <input id="orderClient" class="input" placeholder="Nome do cliente">
+                <input id="orderPassport" class="input" placeholder="Passaporte">
+              </div>
+              <div style="display:flex;gap:8px;margin-bottom:8px">
+                <input id="orderPhone" class="input" placeholder="Telefone / Número" style="flex:1">
+                <select id="orderCar" class="input" style="flex:1">
+                  <option value="">Selecione o carro...</option>
+                </select>
+                <input id="orderQty" type="number" min="1" value="1" class="input" style="width:90px">
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="btn" id="btnCreateOrder">Registrar Pedido</button>
+                <button class="action-btn danger" id="btnClearOrders">Limpar Pedidos (apagar tudo)</button>
+              </div>
+            </div>
+
+            <div style="height:10px"></div>
+
+            <div class="section-title">Lista de Pedidos</div>
+            <div class="small-muted">Vendedores logados veem todos os detalhes; não logados veem só cliente e status.</div>
+            <div style="height:8px"></div>
+            <div id="ordersList" class="lista"></div>
+
+            <div style="height:8px"></div>
+            <div style="display:flex;gap:12px;align-items:center">
+              <div class="small-muted">Pedidos pendentes: <span id="countPending">0</span></div>
+              <div class="small-muted">Pedidos entregues: <span id="countDone">0</span></div>
+            </div>
+          </div>
+
+          <!-- Parcerias (inserida junto, mas a área principal fica oculta até selecionar aba) -->
+          <div id="areaPartners" style="display:none;margin-top:12px">
+            <div class="section-title">Parcerias</div>
+            <div class="small-muted">Visível para todos; edição por Admin. Tema roxo aplicável globalmente por admin.</div>
+
+            <div id="partnersList" style="margin-top:8px"></div>
+
+            <div id="partnersAdminPanel" style="display:none;margin-top:12px">
+              <h3 style="margin:8px 0">Gerenciar Parcerias (Admin)</h3>
+              <div style="display:flex;gap:8px;margin-bottom:8px">
+                <input id="partnerName" class="input" placeholder="Nome do parceiro" style="flex:1">
+                <input id="partnerImg" class="input" placeholder="URL da imagem (opcional)" style="flex:1">
+              </div>
+              <div style="display:flex;gap:8px;margin-bottom:8px">
+                <input id="partnerDesc" class="input" placeholder="Descrição / desconto (ex: Futune 90k → 80k)" style="flex:2">
+                <button class="btn" id="btnAddPartner">Adicionar Parceiro</button>
+                <button class="action-btn danger" id="btnClearPartners">Apagar Todos</button>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button class="action-btn ghost" id="btnToggleTheme">Alternar Tema Roxo</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="right">
+          <div class="total"><div class="label">Total da Ordem (Produtos)</div><div class="value" id="totalValue">R$ 0,00</div></div>
+
+          <!-- Lista simples de produtos adicionados (texto simples) -->
+          <div style="margin-top:10px;color:#fff">
+            <div style="font-weight:700;margin-bottom:6px">Itens adicionados:</div>
+            <div id="cartList" style="font-size:14px;color:rgba(255,255,255,0.9)">— Nenhum item —</div>
+          </div>
+
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button class="btn" id="btnClear">Limpar Quantidades</button>
+            <button class="btn" id="btnExport">Exportar Ordem</button>
+          </div>
+
+          <div style="border-top:1px dashed rgba(255,255,255,0.03);padding-top:10px">
+            <div style="font-size:13px;color:rgba(255,255,255,0.7)">Produtos salvos: <span id="countSaved">0</span></div>
+            <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.6)">A aba <strong>Admin</strong> permite adicionar produtos e gerenciar pedidos e parcerias.</div>
+          </div>
+
+          <div style="height:8px"></div>
+          <div class="section-title">Ferramentas Rápidas</div>
+          <button class="btn" id="btnToggleView">Alternar: Calculadora</button>
+        </div>
+      </div>
+
+      <div class="sparkles" aria-hidden="true"></div>
+    </div>
+
+    <div class="toast" id="toast">Mensagem</div>
+
+    <!-- Admin area -->
+    <div id="adminArea" style="display:none;margin-top:14px">
+      <div class="card admin-panel" style="margin-top:12px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="admUser" placeholder="Usuário (admin)" class="input" style="flex:1" />
+          <input id="admPass" placeholder="Senha (admin)" type="password" class="input" style="flex:1" />
+          <button class="btn" id="btnLogin">Entrar Admin</button>
+          <button class="action-btn danger" id="btnLogout" style="display:none">Logout</button>
+        </div>
+
+        <div id="adminControls" style="display:none;margin-top:8px">
+          <h3 style="margin:0 0 6px 0">Adicionar Produto</h3>
+          <input id="newName" class="input" placeholder="Nome do produto">
+          <input id="newPrice" class="input" placeholder="Preço (somente números)" type="number">
+          <input id="newIcon" class="input" placeholder="Emoji ou URL do ícone (opcional)">
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="btn" id="btnAddProd">Adicionar e Salvar</button>
+            <button class="btn" id="btnImport">Importar JSON</button>
+            <button class="action-btn danger" id="btnResetAll">Resetar Produtos</button>
+            <button class="btn" id="btnResetVehicles">Resetar Veículos</button>
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:6px">OBS: Login e armazenamento são **client-side** (localStorage). Para segurança real, usar servidor.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+/* ---------- Data ---------- */
+const DEFAULT = [
+  {nome:'Full Tuning Carro',preco:90000,icon:'🚘'},
+  {nome:'Full Tuning Moto',preco:60000,icon:'🏍️'},
+  {nome:'Turbo',preco:30000,icon:'🌀'},
+  {nome:'Blindagem',preco:30000,icon:'🛡️'},
+  {nome:'Transmissão',preco:19000,icon:'🔩'},
+  {nome:'Motor',preco:18000,icon:'🔧'},
+  {nome:'Freios',preco:18000,icon:'🛞'},
+  {nome:'Farol',preco:18000,icon:'💡'},
+  {nome:'Rodas',preco:13000,icon:'🏎️'},
+  {nome:'Rastreador',preco:10000,icon:'📡'},
+  {nome:'Neon',preco:10000,icon:'✨'},
+  {nome:'Pintura Cromada',preco:9000,icon:'🪞'},
+  {nome:'Reparo Norte',preco:8000,icon:'📍'},
+  {nome:'Pintura',preco:6000,icon:'🎨'},
+  {nome:'Reparo Sul',preco:5000,icon:'📍'},
+  {nome:'Suspensão',preco:5000,icon:'🛠️'},
+  {nome:'Chassi',preco:4000,icon:'🧱'},
+  {nome:'Choque',preco:4000,icon:'⚡'},
+  {nome:'Vidro',preco:4000,icon:'🪟'},
+  {nome:'Capô',preco:4000,icon:'🧰'},
+  {nome:'Outros',preco:4000,icon:'🔧'},
+  {nome:'Placa',preco:2500,icon:'🔖'},
+  {nome:'Buzina',preco:800,icon:'📯'}
+];
+
+const VEHICLES_DEFAULT = [
+  {nome:'ZENTORNO', preco:300000, categoria:'Esporte'},
+  {nome:'NEON', preco:300000, categoria:'Esporte'},
+  {nome:'VIRTUE', preco:300000, categoria:'Esporte'},
+  {nome:'WINDSOR2', preco:300000, categoria:'Esporte'},
+  {nome:'ENTITY3', preco:300000, categoria:'Esporte'},
+  {nome:'FURIA', preco:300000, categoria:'Esporte'},
+  {nome:'OPENWHEEL', preco:300000, categoria:'Esporte'},
+  {nome:'PANTHERE', preco:300000, categoria:'Esporte'},
+  {nome:'SULTAN3', preco:300000, categoria:'Esporte'},
+  {nome:'T20', preco:300000, categoria:'Esporte'},
+  {nome:'TYRUS', preco:300000, categoria:'Esporte'},
+  {nome:'VAGNER', preco:300000, categoria:'Esporte'},
+  {nome:'VIRTUE', preco:300000, categoria:'Esporte'}, // duplicate safe
+  {nome:'ZORRUSSO', preco:250000, categoria:'Antigos'},
+  {nome:'TULIP2', preco:250000, categoria:'Antigos'},
+  {nome:'EUDORA', preco:250000, categoria:'Antigos'},
+  {nome:'ISSI8', preco:250000, categoria:'Antigos'},
+  {nome:'TAHOMA', preco:250000, categoria:'Antigos'},
+  {nome:'SURFER3', preco:250000, categoria:'Antigos'},
+  {nome:'WEEVIL', preco:250000, categoria:'Antigos'},
+  {nome:'EVERON2', preco:250000, categoria:'Antigos'},
+  {nome:'BATIZ', preco:180000, categoria:'Motos'},
+  {nome:'CHIMERA', preco:180000, categoria:'Motos'},
+  {nome:'SANCHEZ', preco:180000, categoria:'Motos'},
+  {nome:'POWERSI', preco:180000, categoria:'Motos'},
+  {nome:'RROCKET', preco:180000, categoria:'Motos'}
+];
+
+/* ---------- Partners defaults ---------- */
+const PARTNERS_DEFAULT = [
+  {nome:'Polícia Federal da cidade', desc:'Futune: 80% (ex.: 90k → 18k). Reparo: R$5.000 → R$3.000', img:''},
+  {nome:'Eufobucks', desc:'Desconto R$10.000 em tunings grandes (ex.: 90k → 80k / 120k → 110k)', img:''}
+];
+
+/* ---------- State & keys ---------- */
+let produtos = [], vehicles = [], orders = [];
+let sortDesc = true;
+
+const KEY_PRODUCTS = 'bennys_products_vfinal';
+const KEY_VEHICLES = 'bennys_vehicles_vfinal';
+const KEY_ORDERS = 'bennys_orders_vfinal';
+const KEY_PARTNERS = 'bennys_partners_vfinal';
+const KEY_THEME = 'bennys_theme_vfinal';
+
+const listaEl = document.getElementById('lista');
+const listaVehicles = document.getElementById('listaVehicles');
+const totalValue = document.getElementById('totalValue');
+const vehiclesTotal = document.getElementById('vehiclesTotal');
+const vehiclesShare = document.getElementById('vehiclesShare');
+const cartList = document.getElementById('cartList');
+const orderCarSelect = document.getElementById('orderCar');
+const ordersList = document.getElementById('ordersList');
+const toast = document.getElementById('toast');
+const countSaved = document.getElementById('countSaved');
+const sellerInfo = document.getElementById('sellerInfo');
+const partnersListEl = document.getElementById('partnersList');
+const partnersAdminPanel = document.getElementById('partnersAdminPanel');
+
+function fmt(v){ return 'R$ ' + Number(v).toLocaleString('pt-BR') }
+function showToast(msg){ toast.innerText = msg; toast.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>toast.classList.remove('show'),1600); }
+
+/* ---------- Load/Save ---------- */
+function loadProducts(){
+  const raw = localStorage.getItem(KEY_PRODUCTS);
+  produtos = raw ? JSON.parse(raw) : DEFAULT.slice();
+  produtos.forEach(p=> p.qtd = p.qtd || 0);
+  renderProducts(); updateCartList(); updateCountSaved();
+}
+function saveProducts(){ localStorage.setItem(KEY_PRODUCTS, JSON.stringify(produtos)); updateCountSaved(); }
+function updateCountSaved(){ countSaved.innerText = produtos.length }
+
+function loadVehicles(){
+  const raw = localStorage.getItem(KEY_VEHICLES);
+  vehicles = raw ? JSON.parse(raw) : VEHICLES_DEFAULT.slice();
+  vehicles.forEach(v => v.qtd = v.qtd || 0);
+  renderVehicles(); populateVehicleSelect(); computeVehiclesTotals();
+}
+function saveVehicles(){ localStorage.setItem(KEY_VEHICLES, JSON.stringify(vehicles)); }
+
+function loadOrders(){
+  const raw = localStorage.getItem(KEY_ORDERS);
+  orders = raw ? JSON.parse(raw) : [];
+  renderOrders();
+}
+function saveOrders(){ localStorage.setItem(KEY_ORDERS, JSON.stringify(orders)); }
+
+/* Partners load/save */
+function loadPartners(){
+  const raw = localStorage.getItem(KEY_PARTNERS);
+  if(!raw){ localStorage.setItem(KEY_PARTNERS, JSON.stringify(PARTNERS_DEFAULT)); return PARTNERS_DEFAULT.slice(); }
+  try { return JSON.parse(raw); } catch(e){ localStorage.setItem(KEY_PARTNERS, JSON.stringify(PARTNERS_DEFAULT)); return PARTNERS_DEFAULT.slice(); }
+}
+function savePartners(partners){ localStorage.setItem(KEY_PARTNERS, JSON.stringify(partners)); }
+
+/* theme load/save */
+function loadTheme(){
+  return localStorage.getItem(KEY_THEME) || 'default';
+}
+function saveTheme(t){ localStorage.setItem(KEY_THEME, t); }
+
+/* ---------- Products (calculator) ---------- */
+function renderProducts(){
+  produtos.sort((a,b)=> sortDesc ? b.preco - a.preco : a.preco - b.preco);
+  listaEl.innerHTML = '';
+  produtos.forEach((p,i)=>{
+    const it = document.createElement('div'); it.className='item';
+    it.innerHTML = `
+      <div class="name">${p.icon? p.icon+' ' : ''}${p.nome}</div>
+      <div class="meta">
+        <div class="qty">
+          <button data-idx="${i}" data-d="-1">−</button>
+          <div class="num" id="p${i}">${p.qtd}</div>
+          <button data-idx="${i}" data-d="1">+</button>
+        </div>
+      </div>
+      <div class="price">${fmt(p.preco)}</div>
+    `;
+    listaEl.appendChild(it);
+  });
+  document.querySelectorAll('.item .qty button').forEach(b=> b.addEventListener('click', e=>{
+    const idx = Number(e.currentTarget.dataset.idx), d = Number(e.currentTarget.dataset.d);
+    produtos[idx].qtd = Math.max(0, (produtos[idx].qtd||0) + d);
+    document.getElementById('p'+idx).innerText = produtos[idx].qtd;
+    animateTotal(); updateCartList();
+  }));
+  animateTotal(); updateCartList();
+}
+
+function updateCartList(){
+  const items = produtos.filter(p => p.qtd > 0);
+  if (items.length === 0) { cartList.innerText = '— Nenhum item —'; return; }
+  const lines = items.map(p => `${p.nome} (${p.qtd}x) → ${fmt(p.qtd * p.preco)}`);
+  cartList.innerText = lines.join('\n');
+}
+
+function animateTotal(){
+  const from = Number(totalValue.dataset.current || 0);
+  const to = produtos.reduce((s,p)=> s + (p.qtd||0)*Number(p.preco), 0);
+  totalValue.dataset.current = to;
+  const duration = 500; const start = performance.now();
+  function step(now){
+    const t = Math.min(1,(now-start)/duration); const val = Math.round(from + (to-from)*(t*(2-t)));
+    totalValue.innerText = 'R$ ' + val.toLocaleString('pt-BR');
+    if (t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ---------- Vehicles ---------- */
+function renderVehicles(){
+  const orderMap = {'Esporte':0, 'Antigos':1, 'Motos':2};
+  vehicles.sort((a,b)=>{
+    if (a.categoria === b.categoria) return b.preco - a.preco;
+    return (orderMap[a.categoria]||3) - (orderMap[b.categoria]||3);
+  });
+  listaVehicles.innerHTML = '';
+  vehicles.forEach((v,i)=>{
+    const it = document.createElement('div'); it.className='item';
+    const badgeClass = v.categoria === 'Esporte' ? 'sport' : (v.categoria==='Antigos' ? 'old' : 'bike');
+    it.innerHTML = `
+      <div><span class="badge ${badgeClass}">${v.categoria}</span> <strong style="color:#fff">${v.nome}</strong></div>
+      <div class="meta">
+        <div class="qty">
+          <button data-vid="${i}" data-d="-1">−</button>
+          <div class="num" id="v${i}">${v.qtd || 0}</div>
+          <button data-vid="${i}" data-d="1">+</button>
+        </div>
+      </div>
+      <div class="price">${fmt(v.preco)}</div>
+    `;
+    listaVehicles.appendChild(it);
+  });
+  document.querySelectorAll('#listaVehicles .qty button').forEach(b=>{
+    b.addEventListener('click', e=>{
+      const idx = Number(e.currentTarget.dataset.vid), d = Number(e.currentTarget.dataset.d);
+      vehicles[idx].qtd = Math.max(0, (vehicles[idx].qtd||0) + d);
+      document.getElementById('v'+idx).innerText = vehicles[idx].qtd;
+      computeVehiclesTotals();
+    });
+  });
+}
+
+function computeVehiclesTotals(){
+  const total = vehicles.reduce((s,v)=> s + (v.qtd||0) * Number(v.preco), 0);
+  vehiclesTotal.innerText = fmt(total);
+  // mecânica 30% e Bennys 70% example: show mechanic share and remainder
+  const mechShare = Math.round(total * 0.30);
+  vehiclesShare.innerText = fmt(mechShare);
+}
+
+/* populate select */
+function populateVehicleSelect(){
+  orderCarSelect.innerHTML = '<option value="">Selecione o carro...</option>';
+  vehicles.forEach((v)=>{
+    const opt = document.createElement('option');
+    opt.value = v.nome;
+    opt.textContent = `${v.nome} — ${fmt(v.preco)}`;
+    orderCarSelect.appendChild(opt);
+  });
+  orderCarSelect.style.color = '#fff';
+}
+
+/* ---------- Orders ---------- */
+function renderOrders(){
+  ordersList.innerHTML = '';
+  const currentSeller = sessionStorage.getItem('bennys_seller');
+  const isAdmin = sessionStorage.getItem('bennys_is_admin');
+  let pending=0, done=0;
+  const arr = orders.slice().sort((a,b)=> b.createdAt - a.createdAt);
+  arr.forEach(order=>{
+    const div = document.createElement('div'); div.className='order';
+    const left = document.createElement('div'); left.className='left';
+    const title = document.createElement('div'); title.innerHTML = `<strong style="color:#fff">${escapeHtml(order.cliente)}</strong>`;
+    left.appendChild(title);
+
+    const meta = document.createElement('div'); meta.className='meta';
+    const showFull = sessionStorage.getItem('bennys_seller') || sessionStorage.getItem('bennys_is_admin');
+    if (showFull){
+      meta.innerHTML = `<span style="color:#fff">Carro: ${escapeHtml(order.carro)} • Qtde: ${order.qtd} • Passaporte: ${escapeHtml(order.passaporte)} • Telefone: ${escapeHtml(order.telefone)} • Vendedor: ${escapeHtml(order.vendedor)}</span>`;
+    } else {
+      meta.innerHTML = `<span style="color:#fff">Visualização pública: somente cliente e status.</span>`;
+    }
+    left.appendChild(meta);
+
+    const right = document.createElement('div'); right.className='actions';
+    const tag = document.createElement('div'); tag.className='tag ' + (order.status==='Entregue' ? 'done' : 'process');
+    tag.innerText = order.status === 'Entregue' ? 'Entregue' : 'Processando';
+    right.appendChild(tag);
+
+    // modification allowed only for creator or admin
+    const canModify = (sessionStorage.getItem('bennys_is_admin') || (sessionStorage.getItem('bennys_seller') && sessionStorage.getItem('bennys_seller') === order.vendedor));
+    if (canModify){
+      const btnDone = document.createElement('button'); btnDone.className='action-btn small';
+      btnDone.innerText = order.status==='Entregue' ? 'Reabrir' : 'Entregue';
+      btnDone.addEventListener('click', ()=>{
+        order.status = order.status==='Entregue' ? 'Processando' : 'Entregue';
+        saveOrders(); renderOrders(); showToast('Status alterado');
+      });
+      right.appendChild(btnDone);
+
+      const btnEdit = document.createElement('button'); btnEdit.className='action-btn small';
+      btnEdit.innerText = 'Editar';
+      btnEdit.addEventListener('click', ()=> editOrderPrompt(order.id));
+      right.appendChild(btnEdit);
+
+      const btnDel = document.createElement('button'); btnDel.className='action-btn small danger';
+      btnDel.innerText = 'Excluir';
+      btnDel.addEventListener('click', ()=>{
+        if (!confirm('Excluir pedido?')) return;
+        orders = orders.filter(o=> o.id !== order.id);
+        saveOrders(); renderOrders(); showToast('Pedido excluído');
+      });
+      right.appendChild(btnDel);
+    }
+
+    div.appendChild(left); div.appendChild(right);
+    ordersList.appendChild(div);
+
+    if (order.status === 'Processando' || order.status === undefined) pending++;
+    else if (order.status === 'Entregue') done++;
+  });
+  document.getElementById('countPending').innerText = pending;
+  document.getElementById('countDone').innerText = done;
+}
+
+/* edit order */
+function editOrderPrompt(orderId){
+  const ord = orders.find(o=> o.id === orderId);
+  if (!ord) return;
+  const client = prompt('Nome do cliente:', ord.cliente);
+  if (client === null) return;
+  const pass = prompt('Passaporte:', ord.passaporte);
+  if (pass === null) return;
+  const tel = prompt('Telefone:', ord.telefone);
+  if (tel === null) return;
+  // choose vehicle by name
+  const names = vehicles.map(v => v.nome).join('\n');
+  const carChoice = prompt('Escolha o carro pelo nome (exato):\n' + names, ord.carro);
+  if (carChoice === null) return;
+  if (!vehicles.find(v => v.nome === carChoice)) return showToast('Veículo inválido');
+  const qty = prompt('Quantidade:', ord.qtd);
+  if (qty === null) return;
+  const qn = Number(qty);
+  if (isNaN(qn) || qn <= 0) return showToast('Quantidade inválida');
+  ord.cliente = client.trim();
+  ord.passaporte = pass.trim();
+  ord.telefone = tel.trim();
+  ord.carro = carChoice;
+  ord.qtd = qn;
+  saveOrders(); renderOrders(); showToast('Pedido atualizado');
+}
+
+/* ---------- Events ---------- */
+document.getElementById('btnSort').addEventListener('click', function(){
+  sortDesc = !sortDesc; this.innerText = sortDesc ? 'Ordenar: Preço ↓' : 'Ordenar: Preço ↑';
+  renderProducts(); renderVehicles();
+});
+
+document.getElementById('search').addEventListener('input', function(){
+  const term = this.value.trim().toLowerCase();
+  document.querySelectorAll('#lista .item').forEach(it=>{
+    const name = it.querySelector('.name').innerText.toLowerCase();
+    it.style.display = name.includes(term) ? 'grid' : 'none';
+  });
+  document.querySelectorAll('#listaVehicles .item').forEach(it=>{
+    const name = it.querySelector('.name').innerText.toLowerCase();
+    it.style.display = name.includes(term) ? 'grid' : 'none';
+  });
+  document.querySelectorAll('#ordersList .order').forEach(it=>{
+    const txt = it.innerText.toLowerCase();
+    it.style.display = txt.includes(term) ? 'flex' : 'none';
+  });
+});
+
+/* Products quantity actions */
+document.getElementById('btnClear').addEventListener('click', ()=>{
+  produtos.forEach(p=>p.qtd=0); renderProducts(); updateCartList(); showToast('Quantidades limpas');
+});
+document.getElementById('btnExport').addEventListener('click', ()=>{
+  const order = produtos.filter(p=> p.qtd>0).map(p=> ({nome:p.nome,preco:p.preco,qtd:p.qtd,subtotal:p.qtd*p.preco}));
+  if (order.length===0) return showToast('Nenhum item na ordem');
+  const blob = new Blob([JSON.stringify(order,null,2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'ordem_bennys.json'; a.click(); URL.revokeObjectURL(url);
+  showToast('Ordem exportada');
+});
+
+/* Create order */
+document.getElementById('btnCreateOrder').addEventListener('click', ()=>{
+  const seller = sessionStorage.getItem('bennys_seller');
+  if (!seller) return showToast('Faça login como vendedor (senha necessária)');
+  const cliente = document.getElementById('orderClient').value.trim();
+  const pass = document.getElementById('orderPassport').value.trim();
+  const tel = document.getElementById('orderPhone').value.trim();
+  const carroName = document.getElementById('orderCar').value;
+  const qty = Math.max(1, Number(document.getElementById('orderQty').value || 1));
+  // allow 1-char entries: accept anything, fallback '-' if empty
+  const clienteVal = cliente || '-';
+  const passVal = pass || '-';
+  const telVal = tel || '-';
+  const carroVal = carroName || '-';
+  const id = Date.now() + Math.random();
+  const order = { id, cliente: clienteVal, passaporte: passVal, telefone: telVal, carro: carroVal, qtd: qty, vendedor: seller, status: 'Processando', createdAt: Date.now() };
+  orders.push(order); saveOrders(); renderOrders(); showToast('Pedido registrado');
+  document.getElementById('orderClient').value=''; document.getElementById('orderPassport').value=''; document.getElementById('orderPhone').value=''; document.getElementById('orderQty').value='1';
+});
+
+/* Clear orders (admin only) */
+document.getElementById('btnClearOrders').addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Apenas admin pode apagar todos os pedidos');
+  if (!confirm('Apagar todos os pedidos?')) return;
+  orders = []; saveOrders(); renderOrders(); showToast('Todos os pedidos apagados');
+});
+
+/* Seller login */
+const SELLER_PASSWORD = 'ricomelhorchefe00';
+document.getElementById('btnSellerLogin').addEventListener('click', ()=>{
+  const name = document.getElementById('sellerName').value.trim();
+  const pass = document.getElementById('sellerPass').value.trim();
+  if (!name) return showToast('Digite seu nome (vendedor)');
+  if (pass !== SELLER_PASSWORD) return showToast('Senha incorreta');
+  sessionStorage.setItem('bennys_seller', name);
+  sellerInfo.innerText = 'Logado como vendedor: ' + name;
+  document.getElementById('btnSellerLogout').style.display = 'inline-block';
+  document.getElementById('btnSellerLogin').style.display = 'none';
+  document.getElementById('sellerName').style.display = 'none';
+  document.getElementById('sellerPass').style.display = 'none';
+  showToast('Bem-vindo, ' + name);
+  renderOrders();
+});
+document.getElementById('btnSellerLogout').addEventListener('click', ()=>{
+  sessionStorage.removeItem('bennys_seller');
+  sellerInfo.innerText = 'Não logado como vendedor.';
+  document.getElementById('btnSellerLogout').style.display = 'none';
+  document.getElementById('btnSellerLogin').style.display = 'inline-block';
+  document.getElementById('sellerName').style.display = 'inline-block';
+  document.getElementById('sellerPass').style.display = 'inline-block';
+  showToast('Logout vendedor efetuado');
+  renderOrders();
+});
+
+/* Admin (riquinho / suene021) */
+document.getElementById('btnLogin').addEventListener('click', ()=>{
+  const u = document.getElementById('admUser').value.trim(), p = document.getElementById('admPass').value.trim();
+  if (u === 'riquinho' && p === 'suene021'){
+    sessionStorage.setItem('bennys_is_admin','1'); document.getElementById('adminControls').style.display='block';
+    document.getElementById('btnLogout').style.display='inline-block'; document.getElementById('btnLogin').style.display='none';
+    // show partners admin area
+    document.getElementById('partnersAdminPanel').style.display = 'block';
+    showToast('Login admin bem-sucedido'); renderOrders(); renderPartners();
+  } else showToast('Credenciais inválidas');
+});
+document.getElementById('btnLogout').addEventListener('click', ()=>{
+  sessionStorage.removeItem('bennys_is_admin'); document.getElementById('adminControls').style.display='none';
+  document.getElementById('btnLogout').style.display='none'; document.getElementById('btnLogin').style.display='inline-block';
+  document.getElementById('partnersAdminPanel').style.display = 'none';
+  showToast('Logout admin feito'); renderOrders();
+});
+
+/* Admin actions for products/vehicles (unchanged) */
+document.getElementById('btnAddProd').addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Faça login como admin');
+  const name = document.getElementById('newName').value.trim();
+  const price = Number(document.getElementById('newPrice').value);
+  const icon = document.getElementById('newIcon').value.trim();
+  if (!name || !price || price<=0) return showToast('Nome e preço válidos são necessários');
+  produtos.push({nome:name,preco:price,icon:icon||'🔧',qtd:0}); saveProducts(); renderProducts(); showToast('Produto adicionado');
+  document.getElementById('newName').value=''; document.getElementById('newPrice').value=''; document.getElementById('newIcon').value='';
+});
+document.getElementById('btnResetAll').addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Faça login como admin');
+  if (!confirm('Resetar lista de produtos para o padrão?')) return;
+  produtos = DEFAULT.slice(); saveProducts(); renderProducts(); showToast('Produtos resetados');
+});
+document.getElementById('btnImport').addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Faça login como admin');
+  const json = prompt('Cole aqui o JSON de produtos (array com {nome,preco,icon})');
+  if (!json) return;
+  try{
+    const arr = JSON.parse(json);
+    if (!Array.isArray(arr)) throw 0;
+    arr.forEach(a=>{ if (a.nome && a.preco) produtos.push({nome:a.nome,preco:Number(a.preco),icon:a.icon||'🔧',qtd:0}); });
+    saveProducts(); renderProducts(); showToast('Importado com sucesso');
+  }catch(e){ showToast('JSON inválido') }
+});
+document.getElementById('btnResetVehicles').addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Faça login como admin');
+  if (!confirm('Resetar veículos para padrão?')) return;
+  vehicles = VEHICLES_DEFAULT.slice(); saveVehicles(); renderVehicles(); populateVehicleSelect(); showToast('Veículos resetados');
+});
+
+/* Partners admin actions */
+function renderPartners(){
+  const partners = loadPartners();
+  partnersListEl.innerHTML = '';
+  partners.forEach((p, idx) => {
+    const div = document.createElement('div'); div.className = 'partnerCard';
+    if (p.img && p.img.trim()){
+      const img = document.createElement('img'); img.src = p.img; img.alt = p.nome;
+      div.appendChild(img);
+    }
+    const info = document.createElement('div'); info.style.flex = '1';
+    info.innerHTML = `<strong style="color:#fff">${escapeHtml(p.nome)}</strong><div class="small-muted" style="margin-top:6px">${escapeHtml(p.desc || '')}</div>`;
+    div.appendChild(info);
+    if (sessionStorage.getItem('bennys_is_admin')){
+      const del = document.createElement('button'); del.className = 'action-btn small danger'; del.innerText = 'Remover';
+      del.addEventListener('click', ()=>{
+        if(!confirm('Remover parceria?'))return;
+        const ps = loadPartners(); ps.splice(idx,1); savePartners(ps); renderPartners(); showToast('Parceria removida');
+      });
+      div.appendChild(del);
+    }
+    partnersListEl.appendChild(div);
+  });
+}
+
+/* Add partner */
+document.getElementById('btnAddPartner').addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Apenas admin pode adicionar parcerias');
+  const name = document.getElementById('partnerName').value.trim();
+  const img = document.getElementById('partnerImg').value.trim();
+  const desc = document.getElementById('partnerDesc').value.trim();
+  if (!name || !desc) return showToast('Nome e descrição necessários');
+  const ps = loadPartners(); ps.push({nome:name,desc:desc,img:img}); savePartners(ps); renderPartners(); showToast('Parceria adicionada');
+  document.getElementById('partnerName').value=''; document.getElementById('partnerImg').value=''; document.getElementById('partnerDesc').value='';
+});
+
+/* Clear partners */
+document.getElementById('btnClearPartners').addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Apenas admin pode apagar parcerias');
+  if (!confirm('Apagar todas as parcerias?')) return;
+  savePartners([]); renderPartners(); showToast('Parcerias apagadas');
+});
+
+/* Toggle theme global (applies to all users, saved in localStorage) */
+document.getElementById('btnToggleTheme')?.addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Apenas admin pode alterar o tema');
+  const current = loadTheme();
+  const next = current === 'purple' ? 'default' : 'purple';
+  saveTheme(next);
+  applyTheme(next);
+  showToast('Tema alterado para ' + (next === 'purple' ? 'Roxo' : 'Padrão'));
+});
+
+/* Apply theme on body */
+function applyTheme(name){
+  if (name === 'purple'){
+    document.body.classList.add('purple-theme');
+  } else {
+    document.body.classList.remove('purple-theme');
+  }
+}
+
+/* Tabs */
+const tabCalc = document.getElementById('tabCalc'), tabVehicles = document.getElementById('tabVehicles'), tabOrders = document.getElementById('tabOrders'), tabPartners = document.getElementById('tabPartners'), tabAdmin = document.getElementById('tabAdmin');
+const areaCalc = document.getElementById('areaCalc'), areaVehicles = document.getElementById('areaVehicles'), areaOrders = document.getElementById('areaOrders'), partnersArea = document.getElementById('areaPartners'), adminArea = document.getElementById('adminArea');
+
+function activateTab(tab){
+  [tabCalc, tabVehicles, tabOrders, tabPartners, tabAdmin].forEach(t=> t.classList.remove('active'));
+  [areaCalc, areaVehicles, areaOrders, partnersArea, adminArea].forEach(a=> { if(a) a.style.display='none' });
+  if (tab === 'calc'){ tabCalc.classList.add('active'); areaCalc.style.display='block'; }
+  if (tab === 'vehicles'){ tabVehicles.classList.add('active'); areaVehicles.style.display='block'; }
+  if (tab === 'orders'){ tabOrders.classList.add('active'); areaOrders.style.display='block'; }
+  if (tab === 'partners'){ tabPartners.classList.add('active'); partnersArea.style.display='block'; }
+  if (tab === 'admin'){ tabAdmin.classList.add('active'); adminArea.style.display='block'; }
+}
+tabCalc.addEventListener('click', ()=> activateTab('calc'));
+tabVehicles.addEventListener('click', ()=> activateTab('vehicles'));
+tabOrders.addEventListener('click', ()=> activateTab('orders'));
+tabPartners.addEventListener('click', ()=> { activateTab('partners'); renderPartners(); });
+tabAdmin.addEventListener('click', ()=> activateTab('admin'));
+
+document.getElementById('btnToggleView').addEventListener('click', ()=> {
+  if (areaCalc.style.display !== 'block'){ activateTab('calc'); } else if (areaVehicles.style.display !== 'block'){ activateTab('vehicles'); } else if (areaOrders.style.display !== 'block'){ activateTab('orders'); } else activateTab('admin');
+});
+
+/* Utilities */
+function escapeHtml(str){
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/* ---------- Init ---------- */
+function init(){
+  // data init
+  produtos = JSON.parse(localStorage.getItem(KEY_PRODUCTS) || JSON.stringify(DEFAULT));
+  vehicles = JSON.parse(localStorage.getItem(KEY_VEHICLES) || JSON.stringify(VEHICLES_DEFAULT));
+  orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+
+  // ensure qts
+  produtos.forEach(p=> p.qtd = p.qtd || 0);
+  vehicles.forEach(v=> v.qtd = v.qtd || 0);
+
+  renderProducts();
+  renderVehicles();
+  populateVehicleSelect();
+  renderOrders();
+
+  // sparkles
+  const wrap = document.querySelector('.sparkles');
+  for (let i=0;i<14;i++){ const s = document.createElement('div'); s.className='spark'; s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%'; s.style.opacity = (0.02+Math.random()*0.12); s.style.width = (6+Math.random()*18)+'px'; s.style.height = s.style.width; wrap.appendChild(s); }
+
+  // restore admin UI if session active
+  if (sessionStorage.getItem('bennys_is_admin')){
+    document.getElementById('adminControls').style.display='block';
+    document.getElementById('btnLogout').style.display='inline-block';
+    document.getElementById('btnLogin').style.display='none';
+    document.getElementById('partnersAdminPanel').style.display='block';
+  }
+
+  const seller = sessionStorage.getItem('bennys_seller');
+  if (seller){
+    sellerInfo.innerText = 'Logado como vendedor: ' + seller;
+    document.getElementById('btnSellerLogout').style.display = 'inline-block';
+    document.getElementById('btnSellerLogin').style.display = 'none';
+    document.getElementById('sellerName').style.display = 'none';
+    document.getElementById('sellerPass').style.display = 'none';
+  }
+
+  // load partners and theme
+  renderPartners();
+  const theme = loadTheme();
+  if (theme === 'purple') applyTheme('purple');
+
+  // default tab
+  activateTab('calc');
+}
+init();
+
+window.addEventListener('beforeunload', ()=> { localStorage.setItem(KEY_PRODUCTS, JSON.stringify(produtos)); localStorage.setItem(KEY_VEHICLES, JSON.stringify(vehicles)); localStorage.setItem(KEY_ORDERS, JSON.stringify(orders)); });
+
+</script>
+</body>
+</html>
