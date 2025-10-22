@@ -3,54 +3,37 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Oficina Bennys — v4 Final (Pedidos + Parcerias)</title>
+<title>Oficina Bennys — v3 Final</title>
 <style>
-  /* Font */
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-
-  /* Core color variables (will be updated to purple theme when admin toggles) */
   :root{
-    --bg1:#030615; --bg2:#071428;
-    --accent1:#2e8bff; --accent2:#00e6a8;
+    --bg1:#030615; --bg2:#071428; --accent1:#2e8bff; --accent2:#00e6a8;
     --sport:#ffcc00; --old:#ff9f6b; --bike:#6bb7ff;
     --yellow: #f0b429; --green: #00e6a8;
-    --muted: rgba(255,255,255,0.6);
-    --neon-glow: rgba(46,139,255,0.14);
   }
-
-  /* Purple theme variables (applied by JS toggling a class on <body>) */
-  body.purple-theme {
-    --accent1: #a000ff;
-    --accent2: #c68bff;
-    --neon-glow: rgba(160,0,255,0.16);
+  /* purple theme overrides */
+  .purple-theme {
+    --accent1: #a020f0;
+    --accent2: #d28bff;
   }
 
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0; font-family:'Poppins',sans-serif;
-    background:
-      radial-gradient(900px 500px at 10% 10%, rgba(46,139,255,0.06),transparent),
-      linear-gradient(180deg,var(--bg1),var(--bg2));
+    background:radial-gradient(900px 500px at 10% 10%, rgba(46,139,255,0.06),transparent),
+               linear-gradient(180deg,var(--bg1),var(--bg2));
     color:#eaf6ff; display:flex; align-items:center; justify-content:center; padding:28px;
   }
 
   .app{width:100%;max-width:1100px;position:relative}
-  .header{
-    position:fixed;left:50%;transform:translateX(-50%);top:12px;
-    background:linear-gradient(90deg,rgba(46,139,255,0.12),rgba(0,198,255,0.06));
-    padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);
-    backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);
-    font-weight:700;color:var(--accent1);display:flex;gap:14px;align-items:center;z-index:40;
-    transition:box-shadow .3s, background .3s;
-  }
+  .header{position:fixed;left:50%;transform:translateX(-50%);top:12px;background:linear-gradient(90deg,rgba(46,139,255,0.12),rgba(0,198,255,0.06));padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);backdrop-filter:blur(6px);box-shadow:0 8px 30px rgba(2,6,23,0.6);font-weight:700;color:var(--accent1);display:flex;gap:14px;align-items:center;z-index:40}
   .logo{font-size:18px}
   .tabs{display:flex;gap:8px}
   .tab{padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:600;color:#cfe9ff}
-  .tab.active{background:linear-gradient(90deg,var(--accent1),#1a6ed8);box-shadow:0 8px 22px var(--neon-glow)}
+  .tab.active{background:linear-gradient(90deg,var(--accent1),#1a6ed8);box-shadow:0 8px 22px rgba(46,139,255,0.16)}
 
-  .card{margin-top:72px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:18px;border-radius:14px;box-shadow:0 20px 60px rgba(2,6,23,0.6);overflow:hidden;transition:transform .18s}
-  .card:hover{transform:translateY(-3px)}
+  .card{margin-top:72px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04);padding:18px;border-radius:14px;box-shadow:0 20px 60px rgba(2,6,23,0.6);overflow:hidden}
 
   .controls{display:flex;gap:12px;align-items:center}
   .search{flex:1}
@@ -69,7 +52,7 @@
   .item .name{font-weight:700;color:#fff}
   .item .meta{display:flex;align-items:center;gap:8px;justify-content:center}
   .qty{display:flex;align-items:center;gap:8px}
-  .qty button{width:34px;height:34px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px var(--neon-glow);transition:transform .12s;}
+  .qty button{width:34px;height:34px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 18px rgba(46,139,255,0.12);transition:transform .12s;}
   .qty button:active{transform:scale(.96)}
   .qty .num{min-width:30px;text-align:center;font-weight:800;color:#fff}
   .price{font-weight:800;text-align:right;color:var(--accent2)}
@@ -79,36 +62,32 @@
 
   .total{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:10px;background:linear-gradient(90deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03)}
   .total .label{font-weight:700;color:var(--accent1)}
-  .total .value{font-weight:900;color:var(--accent2);font-size:1.5rem;transition:color .2s}
+  .total .value{font-weight:900;color:var(--accent2);font-size:1.5rem}
 
-  .btn{padding:10px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;font-weight:700;cursor:pointer;box-shadow:0 10px 20px var(--neon-glow)}
-  .action-btn{padding:8px 10px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:#fff;font-weight:700;cursor:pointer;min-width:110px}
-  .action-btn.small{padding:6px 8px;min-width:90px}
-  .action-btn.danger{background:#ff6b6b}
-  .action-btn.ghost{background:rgba(255,255,255,0.04);color:#fff;border:1px solid rgba(255,255,255,0.06);}
+  .btn{padding:10px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;font-weight:700;cursor:pointer}
 
   .admin-panel{display:flex;flex-direction:column;gap:10px}
   .input{padding:9px;border-radius:8px;border:none;background:rgba(255,255,255,0.03);outline:none;color:#fff}
   .input::placeholder{color:rgba(255,255,255,0.6)}
 
   /* ensure select is readable */
-  select.input{background:linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)); color:#fff; border-radius:8px; padding:9px; border:1px solid rgba(255,255,255,0.04); appearance:none}
+  select.input{background:rgba(255,255,255,0.03); color:#fff; border-radius:8px; padding:9px; border:1px solid rgba(255,255,255,0.04); appearance:none}
   select.input option{background:#071428; color:#fff}
 
-  /* sparkles / neon animations */
   .sparkles{position:absolute;inset:0;pointer-events:none;mix-blend-mode:screen;z-index:2}
   .spark{position:absolute;width:10px;height:10px;border-radius:50%;background:linear-gradient(90deg,var(--accent1),var(--accent2));filter:blur(6px);opacity:.06;animation: floaty 6s linear infinite}
-  @keyframes floaty{0%{transform:translateY(0) translateX(0) scale(.9)}25%{transform:translateY(-24px) translateX(10px) scale(1)}50%{transform:translateY(-60px) translateX(20px) scale(.9)}75%{transform:translateY(-24px) translateX(10px) scale(1)}100%{transform:translateY(0) translateX(0) scale(.9)}}
+  @keyframes floaty{0%{transform:translateY(0) translateX(0)}50%{transform:translateY(-60px) translateX(20px)}100%{transform:translateY(0) translateX(0)}}
 
-  /* subtle neon border pulse for cards */
-  .card::after{
-    content:"";position:absolute;inset:auto 18px 18px 18px;border-radius:12px;
-    box-shadow:0 0 40px 6px rgba(46,139,255,0.02);pointer-events:none;transition:box-shadow .4s;
-  }
-  body.purple-theme .card::after{ box-shadow:0 0 60px 10px rgba(160,0,255,0.03); }
+  .toast{position:fixed;right:22px;bottom:22px;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px rgba(46,139,255,0.18);transform:translateY(12px);opacity:0;transition:opacity .28s, transform .28s;z-index:999}
+  .toast.show{opacity:1;transform:none}
+
+  .badge{padding:6px 8px;border-radius:8px;font-weight:800}
+  .badge.sport{background:linear-gradient(90deg, rgba(255,204,0,0.12), rgba(255,204,0,0.06));color:var(--sport)}
+  .badge.old{background:linear-gradient(90deg, rgba(255,159,107,0.10), rgba(255,159,107,0.04));color:var(--old)}
+  .badge.bike{background:linear-gradient(90deg, rgba(107,183,255,0.10), rgba(107,183,255,0.04));color:var(--bike)}
 
   /* Orders compact */
-  .order{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);height:auto}
+  .order{display:flex;align-items:center;justify-content:space-between;padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);height:84px}
   .order .left{display:flex;flex-direction:column;gap:6px}
   .order .meta{font-size:13px;color:rgba(255,255,255,0.85)}
   .order .actions{display:flex;gap:8px;align-items:center}
@@ -116,13 +95,28 @@
   .tag.process{background:rgba(240,180,41,0.12);color:var(--yellow);font-weight:800}
   .tag.done{background:rgba(0,230,168,0.08);color:var(--green);font-weight:800}
 
-  .partnerCard{display:flex;align-items:center;gap:12px;background:linear-gradient(90deg, rgba(0,0,0,0.18), rgba(255,255,255,0.02));padding:12px;border-radius:10px;margin:8px 0;border:1px solid rgba(255,255,255,0.03)}
-  .partnerCard img{width:60px;height:60px;border-radius:8px;object-fit:cover}
+  /* action buttons standardized */
+  .action-btn{padding:8px 10px;border-radius:8px;border:none;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:#fff;font-weight:700;cursor:pointer;min-width:110px}
+  .action-btn.small{padding:6px 8px;min-width:90px}
+  .action-btn.danger{background:#ff6b6b}
+  .action-btn.ghost{background:rgba(255,255,255,0.04);color:#fff;border:1px solid rgba(255,255,255,0.06);}
 
-  .toast{position:fixed;right:22px;bottom:22px;background:linear-gradient(90deg,var(--accent1),#1a6ed8);color:white;padding:10px 14px;border-radius:10px;box-shadow:0 10px 30px var(--neon-glow);transform:translateY(12px);opacity:0;transition:opacity .28s, transform .28s;z-index:999}
-  .toast.show{opacity:1;transform:none}
-
+  /* make option text visible in some browsers - fallback: JS sets option color */
   option{color:#fff}
+
+  /* watermark */
+  .watermark{
+    position:fixed; right:16px; bottom:16px; font-size:72px; font-weight:900;
+    color:#fff; opacity:0.06; pointer-events:none; transform:rotate(-18deg); z-index:50;
+    text-transform:lowercase; letter-spacing:8px;
+  }
+
+  /* partnerships cards */
+  .partner-card{display:flex;gap:12px;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(90deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.03)}
+  .partner-card img{width:80px;height:60px;object-fit:cover;border-radius:8px}
+  .partner-info{display:flex;flex-direction:column;gap:6px}
+  .partner-name{font-weight:800;color:#fff}
+  .partner-desc{font-size:13px;color:rgba(255,255,255,0.75)}
 </style>
 </head>
 <body>
@@ -135,6 +129,10 @@
         <div class="tab" id="tabOrders">Pedidos</div>
         <div class="tab" id="tabPartners">Parcerias</div>
         <div class="tab" id="tabAdmin">Admin</div>
+      </div>
+      <!-- public theme toggle -->
+      <div style="margin-left:12px">
+        <button class="action-btn small" id="btnThemePurple" title="Mudar tema para roxo (visível a todos)">Tema Roxo</button>
       </div>
     </div>
 
@@ -156,7 +154,7 @@
           <!-- Veículos -->
           <div id="areaVehicles" style="display:none">
             <div class="section-title">Veículos — Vendas</div>
-            <div class="small-muted">Esportivos em cima, Antigos embaixo, Motos por último. Calcula mecânica (30% por você) e parte Bennys.</div>
+            <div class="small-muted">Esportivos em cima, Antigos embaixo, Motos por último. Cálculo mostra 50% para a mecânica.</div>
             <div style="height:8px"></div>
             <div class="lista" id="listaVehicles"></div>
             <div style="height:8px"></div>
@@ -165,7 +163,7 @@
               <div class="value" id="vehiclesTotal">R$ 0,00</div>
             </div>
             <div class="total" style="margin-top:8px">
-              <div class="label">Parte da Mecânica (30%)</div>
+              <div class="label">Parte da Mecânica (50%)</div>
               <div class="value" id="vehiclesShare">R$ 0,00</div>
             </div>
           </div>
@@ -216,28 +214,15 @@
             </div>
           </div>
 
-          <!-- Parcerias (inserida junto, mas a área principal fica oculta até selecionar aba) -->
-          <div id="areaPartners" style="display:none;margin-top:12px">
+          <!-- Parcerias -->
+          <div id="areaPartners" style="display:none">
             <div class="section-title">Parcerias</div>
-            <div class="small-muted">Visível para todos; edição por Admin. Tema roxo aplicável globalmente por admin.</div>
+            <div class="small-muted">Aqui aparecem as parcerias. Faça login como admin para adicionar ou remover.</div>
+            <div style="height:8px"></div>
+            <div id="partnersList" class="lista"></div>
 
-            <div id="partnersList" style="margin-top:8px"></div>
-
-            <div id="partnersAdminPanel" style="display:none;margin-top:12px">
-              <h3 style="margin:8px 0">Gerenciar Parcerias (Admin)</h3>
-              <div style="display:flex;gap:8px;margin-bottom:8px">
-                <input id="partnerName" class="input" placeholder="Nome do parceiro" style="flex:1">
-                <input id="partnerImg" class="input" placeholder="URL da imagem (opcional)" style="flex:1">
-              </div>
-              <div style="display:flex;gap:8px;margin-bottom:8px">
-                <input id="partnerDesc" class="input" placeholder="Descrição / desconto (ex: Futune 90k → 80k)" style="flex:2">
-                <button class="btn" id="btnAddPartner">Adicionar Parceiro</button>
-                <button class="action-btn danger" id="btnClearPartners">Apagar Todos</button>
-              </div>
-              <div style="display:flex;gap:8px">
-                <button class="action-btn ghost" id="btnToggleTheme">Alternar Tema Roxo</button>
-              </div>
-            </div>
+            <div style="height:8px"></div>
+            <div class="small-muted">Quando estiver logado como admin, use o painel Admin à direita para gerenciar parcerias.</div>
           </div>
 
         </div>
@@ -258,7 +243,7 @@
 
           <div style="border-top:1px dashed rgba(255,255,255,0.03);padding-top:10px">
             <div style="font-size:13px;color:rgba(255,255,255,0.7)">Produtos salvos: <span id="countSaved">0</span></div>
-            <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.6)">A aba <strong>Admin</strong> permite adicionar produtos e gerenciar pedidos e parcerias.</div>
+            <div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,0.6)">A aba <strong>Admin</strong> permite adicionar produtos, parcerias e gerenciar pedidos.</div>
           </div>
 
           <div style="height:8px"></div>
@@ -271,6 +256,9 @@
     </div>
 
     <div class="toast" id="toast">Mensagem</div>
+
+    <!-- watermark -->
+    <div class="watermark">rico</div>
 
     <!-- Admin area -->
     <div id="adminArea" style="display:none;margin-top:14px">
@@ -293,7 +281,19 @@
             <button class="action-btn danger" id="btnResetAll">Resetar Produtos</button>
             <button class="btn" id="btnResetVehicles">Resetar Veículos</button>
           </div>
-          <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:6px">OBS: Login e armazenamento são **client-side** (localStorage). Para segurança real, usar servidor.</div>
+
+          <hr style="border:none;border-top:1px dashed rgba(255,255,255,0.04);margin:10px 0">
+
+          <h3 style="margin:0 0 6px 0">Gerenciar Parcerias</h3>
+          <input id="newPartnerName" class="input" placeholder="Nome da parceria (ex: Loja X)">
+          <input id="newPartnerImg" class="input" placeholder="URL da imagem (ex: https://...)">
+          <input id="newPartnerDesc" class="input" placeholder="Descrição curta">
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <button class="btn" id="btnAddPartner">Adicionar Parceria</button>
+            <button class="action-btn danger" id="btnResetPartners">Limpar Parcerias</button>
+          </div>
+
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:6px">OBS: Login e armazenamento são <strong>client-side</strong> (localStorage). Para segurança real, usar servidor.</div>
         </div>
       </div>
     </div>
@@ -341,7 +341,6 @@ const VEHICLES_DEFAULT = [
   {nome:'T20', preco:300000, categoria:'Esporte'},
   {nome:'TYRUS', preco:300000, categoria:'Esporte'},
   {nome:'VAGNER', preco:300000, categoria:'Esporte'},
-  {nome:'VIRTUE', preco:300000, categoria:'Esporte'}, // duplicate safe
   {nome:'ZORRUSSO', preco:250000, categoria:'Antigos'},
   {nome:'TULIP2', preco:250000, categoria:'Antigos'},
   {nome:'EUDORA', preco:250000, categoria:'Antigos'},
@@ -357,21 +356,15 @@ const VEHICLES_DEFAULT = [
   {nome:'RROCKET', preco:180000, categoria:'Motos'}
 ];
 
-/* ---------- Partners defaults ---------- */
-const PARTNERS_DEFAULT = [
-  {nome:'Polícia Federal da cidade', desc:'Futune: 80% (ex.: 90k → 18k). Reparo: R$5.000 → R$3.000', img:''},
-  {nome:'Eufobucks', desc:'Desconto R$10.000 em tunings grandes (ex.: 90k → 80k / 120k → 110k)', img:''}
-];
-
 /* ---------- State & keys ---------- */
-let produtos = [], vehicles = [], orders = [];
+let produtos = [], vehicles = [], orders = [], partners = [];
 let sortDesc = true;
 
-const KEY_PRODUCTS = 'bennys_products_vfinal';
-const KEY_VEHICLES = 'bennys_vehicles_vfinal';
-const KEY_ORDERS = 'bennys_orders_vfinal';
-const KEY_PARTNERS = 'bennys_partners_vfinal';
-const KEY_THEME = 'bennys_theme_vfinal';
+const KEY_PRODUCTS = 'bennys_products_v3';
+const KEY_VEHICLES = 'bennys_vehicles_v3';
+const KEY_ORDERS = 'bennys_orders_v3';
+const KEY_PARTNERS = 'bennys_partners_v3';
+const KEY_THEME = 'bennys_theme_v3';
 
 const listaEl = document.getElementById('lista');
 const listaVehicles = document.getElementById('listaVehicles');
@@ -381,11 +374,10 @@ const vehiclesShare = document.getElementById('vehiclesShare');
 const cartList = document.getElementById('cartList');
 const orderCarSelect = document.getElementById('orderCar');
 const ordersList = document.getElementById('ordersList');
+const partnersList = document.getElementById('partnersList');
 const toast = document.getElementById('toast');
 const countSaved = document.getElementById('countSaved');
 const sellerInfo = document.getElementById('sellerInfo');
-const partnersListEl = document.getElementById('partnersList');
-const partnersAdminPanel = document.getElementById('partnersAdminPanel');
 
 function fmt(v){ return 'R$ ' + Number(v).toLocaleString('pt-BR') }
 function showToast(msg){ toast.innerText = msg; toast.classList.add('show'); clearTimeout(window._tt); window._tt=setTimeout(()=>toast.classList.remove('show'),1600); }
@@ -415,19 +407,12 @@ function loadOrders(){
 }
 function saveOrders(){ localStorage.setItem(KEY_ORDERS, JSON.stringify(orders)); }
 
-/* Partners load/save */
 function loadPartners(){
   const raw = localStorage.getItem(KEY_PARTNERS);
-  if(!raw){ localStorage.setItem(KEY_PARTNERS, JSON.stringify(PARTNERS_DEFAULT)); return PARTNERS_DEFAULT.slice(); }
-  try { return JSON.parse(raw); } catch(e){ localStorage.setItem(KEY_PARTNERS, JSON.stringify(PARTNERS_DEFAULT)); return PARTNERS_DEFAULT.slice(); }
+  partners = raw ? JSON.parse(raw) : [];
+  renderPartners();
 }
-function savePartners(partners){ localStorage.setItem(KEY_PARTNERS, JSON.stringify(partners)); }
-
-/* theme load/save */
-function loadTheme(){
-  return localStorage.getItem(KEY_THEME) || 'default';
-}
-function saveTheme(t){ localStorage.setItem(KEY_THEME, t); }
+function savePartners(){ localStorage.setItem(KEY_PARTNERS, JSON.stringify(partners)); }
 
 /* ---------- Products (calculator) ---------- */
 function renderProducts(){
@@ -468,7 +453,7 @@ function animateTotal(){
   const from = Number(totalValue.dataset.current || 0);
   const to = produtos.reduce((s,p)=> s + (p.qtd||0)*Number(p.preco), 0);
   totalValue.dataset.current = to;
-  const duration = 500; const start = performance.now();
+  const duration = 400; const start = performance.now();
   function step(now){
     const t = Math.min(1,(now-start)/duration); const val = Math.round(from + (to-from)*(t*(2-t)));
     totalValue.innerText = 'R$ ' + val.toLocaleString('pt-BR');
@@ -507,6 +492,10 @@ function renderVehicles(){
       vehicles[idx].qtd = Math.max(0, (vehicles[idx].qtd||0) + d);
       document.getElementById('v'+idx).innerText = vehicles[idx].qtd;
       computeVehiclesTotals();
+      // keep select qty in sync if that vehicle is selected
+      if (orderCarSelect.value === vehicles[idx].nome){
+        document.getElementById('orderQty').value = Math.max(1, vehicles[idx].qtd || 1);
+      }
     });
   });
 }
@@ -514,21 +503,51 @@ function renderVehicles(){
 function computeVehiclesTotals(){
   const total = vehicles.reduce((s,v)=> s + (v.qtd||0) * Number(v.preco), 0);
   vehiclesTotal.innerText = fmt(total);
-  // mecânica 30% e Bennys 70% example: show mechanic share and remainder
-  const mechShare = Math.round(total * 0.30);
-  vehiclesShare.innerText = fmt(mechShare);
+  vehiclesShare.innerText = fmt(Math.round(total * 0.5));
 }
 
-/* populate select */
 function populateVehicleSelect(){
   orderCarSelect.innerHTML = '<option value="">Selecione o carro...</option>';
   vehicles.forEach((v)=>{
     const opt = document.createElement('option');
-    opt.value = v.nome;
+    opt.value = v.nome; // keep name as value
     opt.textContent = `${v.nome} — ${fmt(v.preco)}`;
+    opt.style.color = '#fff';
     orderCarSelect.appendChild(opt);
   });
+  // ensure select displayed text white
   orderCarSelect.style.color = '#fff';
+}
+
+/* ---------- Partners ---------- */
+function renderPartners(){
+  partnersList.innerHTML = '';
+  if (partners.length === 0){
+    partnersList.innerHTML = '<div class="small-muted">Nenhuma parceria ainda.</div>';
+    return;
+  }
+  partners.slice().reverse().forEach((p,i)=>{
+    const el = document.createElement('div'); el.className = 'partner-card';
+    el.innerHTML = `
+      <img src="${p.img || ''}" onerror="this.style.display='none'">
+      <div class="partner-info">
+        <div class="partner-name">${p.name}</div>
+        <div class="partner-desc">${p.desc || ''}</div>
+      </div>
+    `;
+    // if admin, allow delete button
+    if (sessionStorage.getItem('bennys_is_admin')){
+      const del = document.createElement('button'); del.className='action-btn small action-btn-ghost'; del.style.marginLeft='auto';
+      del.innerText = 'Excluir';
+      del.addEventListener('click', ()=>{
+        if (!confirm('Excluir parceria?')) return;
+        partners = partners.filter(pp => pp !== p);
+        savePartners(); renderPartners(); showToast('Parceria excluída');
+      });
+      el.appendChild(del);
+    }
+    partnersList.appendChild(el);
+  });
 }
 
 /* ---------- Orders ---------- */
@@ -541,13 +560,14 @@ function renderOrders(){
   arr.forEach(order=>{
     const div = document.createElement('div'); div.className='order';
     const left = document.createElement('div'); left.className='left';
-    const title = document.createElement('div'); title.innerHTML = `<strong style="color:#fff">${escapeHtml(order.cliente)}</strong>`;
+    const title = document.createElement('div'); title.innerHTML = `<strong style="color:#fff">${order.cliente}</strong>`;
     left.appendChild(title);
 
     const meta = document.createElement('div'); meta.className='meta';
     const showFull = sessionStorage.getItem('bennys_seller') || sessionStorage.getItem('bennys_is_admin');
     if (showFull){
-      meta.innerHTML = `<span style="color:#fff">Carro: ${escapeHtml(order.carro)} • Qtde: ${order.qtd} • Passaporte: ${escapeHtml(order.passaporte)} • Telefone: ${escapeHtml(order.telefone)} • Vendedor: ${escapeHtml(order.vendedor)}</span>`;
+      // show all details
+      meta.innerHTML = `<span style="color:#fff">Carro: ${order.carro} • Qtde: ${order.qtd} • Passaporte: ${order.passaporte} • Telefone: ${order.telefone} • Vendedor: ${order.vendedor}</span>`;
     } else {
       meta.innerHTML = `<span style="color:#fff">Visualização pública: somente cliente e status.</span>`;
     }
@@ -577,6 +597,7 @@ function renderOrders(){
       const btnDel = document.createElement('button'); btnDel.className='action-btn small danger';
       btnDel.innerText = 'Excluir';
       btnDel.addEventListener('click', ()=>{
+
         if (!confirm('Excluir pedido?')) return;
         orders = orders.filter(o=> o.id !== order.id);
         saveOrders(); renderOrders(); showToast('Pedido excluído');
@@ -641,6 +662,10 @@ document.getElementById('search').addEventListener('input', function(){
     const txt = it.innerText.toLowerCase();
     it.style.display = txt.includes(term) ? 'flex' : 'none';
   });
+  document.querySelectorAll('#partnersList .partner-card').forEach(it=>{
+    const txt = it.innerText.toLowerCase();
+    it.style.display = txt.includes(term) ? 'flex' : 'none';
+  });
 });
 
 /* Products quantity actions */
@@ -663,14 +688,11 @@ document.getElementById('btnCreateOrder').addEventListener('click', ()=>{
   const pass = document.getElementById('orderPassport').value.trim();
   const tel = document.getElementById('orderPhone').value.trim();
   const carroName = document.getElementById('orderCar').value;
+  // qty now uses the input value (which is synced on select change)
   const qty = Math.max(1, Number(document.getElementById('orderQty').value || 1));
-  // allow 1-char entries: accept anything, fallback '-' if empty
-  const clienteVal = cliente || '-';
-  const passVal = pass || '-';
-  const telVal = tel || '-';
-  const carroVal = carroName || '-';
+  if (!cliente || carroName === '') return showToast('Preencha cliente e selecione o carro');
   const id = Date.now() + Math.random();
-  const order = { id, cliente: clienteVal, passaporte: passVal, telefone: telVal, carro: carroVal, qtd: qty, vendedor: seller, status: 'Processando', createdAt: Date.now() };
+  const order = { id, cliente, passaporte: pass, telefone: tel, carro: carroName, qtd: qty, vendedor: seller, status: 'Processando', createdAt: Date.now() };
   orders.push(order); saveOrders(); renderOrders(); showToast('Pedido registrado');
   document.getElementById('orderClient').value=''; document.getElementById('orderPassport').value=''; document.getElementById('orderPhone').value=''; document.getElementById('orderQty').value='1';
 });
@@ -715,19 +737,16 @@ document.getElementById('btnLogin').addEventListener('click', ()=>{
   if (u === 'riquinho' && p === 'suene021'){
     sessionStorage.setItem('bennys_is_admin','1'); document.getElementById('adminControls').style.display='block';
     document.getElementById('btnLogout').style.display='inline-block'; document.getElementById('btnLogin').style.display='none';
-    // show partners admin area
-    document.getElementById('partnersAdminPanel').style.display = 'block';
     showToast('Login admin bem-sucedido'); renderOrders(); renderPartners();
   } else showToast('Credenciais inválidas');
 });
 document.getElementById('btnLogout').addEventListener('click', ()=>{
   sessionStorage.removeItem('bennys_is_admin'); document.getElementById('adminControls').style.display='none';
   document.getElementById('btnLogout').style.display='none'; document.getElementById('btnLogin').style.display='inline-block';
-  document.getElementById('partnersAdminPanel').style.display = 'none';
-  showToast('Logout admin feito'); renderOrders();
+  showToast('Logout admin feito'); renderOrders(); renderPartners();
 });
 
-/* Admin actions for products/vehicles (unchanged) */
+/* Admin actions */
 document.getElementById('btnAddProd').addEventListener('click', ()=>{
   if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Faça login como admin');
   const name = document.getElementById('newName').value.trim();
@@ -759,130 +778,72 @@ document.getElementById('btnResetVehicles').addEventListener('click', ()=>{
   vehicles = VEHICLES_DEFAULT.slice(); saveVehicles(); renderVehicles(); populateVehicleSelect(); showToast('Veículos resetados');
 });
 
-/* Partners admin actions */
-function renderPartners(){
-  const partners = loadPartners();
-  partnersListEl.innerHTML = '';
-  partners.forEach((p, idx) => {
-    const div = document.createElement('div'); div.className = 'partnerCard';
-    if (p.img && p.img.trim()){
-      const img = document.createElement('img'); img.src = p.img; img.alt = p.nome;
-      div.appendChild(img);
-    }
-    const info = document.createElement('div'); info.style.flex = '1';
-    info.innerHTML = `<strong style="color:#fff">${escapeHtml(p.nome)}</strong><div class="small-muted" style="margin-top:6px">${escapeHtml(p.desc || '')}</div>`;
-    div.appendChild(info);
-    if (sessionStorage.getItem('bennys_is_admin')){
-      const del = document.createElement('button'); del.className = 'action-btn small danger'; del.innerText = 'Remover';
-      del.addEventListener('click', ()=>{
-        if(!confirm('Remover parceria?'))return;
-        const ps = loadPartners(); ps.splice(idx,1); savePartners(ps); renderPartners(); showToast('Parceria removida');
-      });
-      div.appendChild(del);
-    }
-    partnersListEl.appendChild(div);
-  });
-}
-
-/* Add partner */
+/* Admin - partners */
 document.getElementById('btnAddPartner').addEventListener('click', ()=>{
-  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Apenas admin pode adicionar parcerias');
-  const name = document.getElementById('partnerName').value.trim();
-  const img = document.getElementById('partnerImg').value.trim();
-  const desc = document.getElementById('partnerDesc').value.trim();
-  if (!name || !desc) return showToast('Nome e descrição necessários');
-  const ps = loadPartners(); ps.push({nome:name,desc:desc,img:img}); savePartners(ps); renderPartners(); showToast('Parceria adicionada');
-  document.getElementById('partnerName').value=''; document.getElementById('partnerImg').value=''; document.getElementById('partnerDesc').value='';
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Faça login como admin');
+  const name = document.getElementById('newPartnerName').value.trim();
+  const img = document.getElementById('newPartnerImg').value.trim();
+  const desc = document.getElementById('newPartnerDesc').value.trim();
+  if (!name) return showToast('Nome da parceria é necessário');
+  partners.push({name, img, desc}); savePartners(); renderPartners(); showToast('Parceria adicionada');
+  document.getElementById('newPartnerName').value=''; document.getElementById('newPartnerImg').value=''; document.getElementById('newPartnerDesc').value='';
 });
-
-/* Clear partners */
-document.getElementById('btnClearPartners').addEventListener('click', ()=>{
-  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Apenas admin pode apagar parcerias');
-  if (!confirm('Apagar todas as parcerias?')) return;
-  savePartners([]); renderPartners(); showToast('Parcerias apagadas');
+document.getElementById('btnResetPartners').addEventListener('click', ()=>{
+  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Faça login como admin');
+  if (!confirm('Limpar todas as parcerias?')) return;
+  partners = []; savePartners(); renderPartners(); showToast('Parcerias limpas');
 });
-
-/* Toggle theme global (applies to all users, saved in localStorage) */
-document.getElementById('btnToggleTheme')?.addEventListener('click', ()=>{
-  if (!sessionStorage.getItem('bennys_is_admin')) return showToast('Apenas admin pode alterar o tema');
-  const current = loadTheme();
-  const next = current === 'purple' ? 'default' : 'purple';
-  saveTheme(next);
-  applyTheme(next);
-  showToast('Tema alterado para ' + (next === 'purple' ? 'Roxo' : 'Padrão'));
-});
-
-/* Apply theme on body */
-function applyTheme(name){
-  if (name === 'purple'){
-    document.body.classList.add('purple-theme');
-  } else {
-    document.body.classList.remove('purple-theme');
-  }
-}
 
 /* Tabs */
-const tabCalc = document.getElementById('tabCalc'), tabVehicles = document.getElementById('tabVehicles'), tabOrders = document.getElementById('tabOrders'), tabPartners = document.getElementById('tabPartners'), tabAdmin = document.getElementById('tabAdmin');
-const areaCalc = document.getElementById('areaCalc'), areaVehicles = document.getElementById('areaVehicles'), areaOrders = document.getElementById('areaOrders'), partnersArea = document.getElementById('areaPartners'), adminArea = document.getElementById('adminArea');
+const tabCalc = document.getElementById('tabCalc'), tabVehicles = document.getElementById('tabVehicles'), tabOrders = document.getElementById('tabOrders'), tabAdmin = document.getElementById('tabAdmin'), tabPartners = document.getElementById('tabPartners');
+const areaCalc = document.getElementById('areaCalc'), areaVehicles = document.getElementById('areaVehicles'), areaOrders = document.getElementById('areaOrders'), adminArea = document.getElementById('adminArea'), areaPartners = document.getElementById('areaPartners');
 
 function activateTab(tab){
-  [tabCalc, tabVehicles, tabOrders, tabPartners, tabAdmin].forEach(t=> t.classList.remove('active'));
-  [areaCalc, areaVehicles, areaOrders, partnersArea, adminArea].forEach(a=> { if(a) a.style.display='none' });
+  [tabCalc, tabVehicles, tabOrders, tabAdmin, tabPartners].forEach(t=> t.classList.remove('active'));
+  [areaCalc, areaVehicles, areaOrders, adminArea, areaPartners].forEach(a=> a.style.display='none');
   if (tab === 'calc'){ tabCalc.classList.add('active'); areaCalc.style.display='block'; }
   if (tab === 'vehicles'){ tabVehicles.classList.add('active'); areaVehicles.style.display='block'; }
   if (tab === 'orders'){ tabOrders.classList.add('active'); areaOrders.style.display='block'; }
-  if (tab === 'partners'){ tabPartners.classList.add('active'); partnersArea.style.display='block'; }
   if (tab === 'admin'){ tabAdmin.classList.add('active'); adminArea.style.display='block'; }
+  if (tab === 'partners'){ tabPartners.classList.add('active'); areaPartners.style.display='block'; }
 }
 tabCalc.addEventListener('click', ()=> activateTab('calc'));
 tabVehicles.addEventListener('click', ()=> activateTab('vehicles'));
 tabOrders.addEventListener('click', ()=> activateTab('orders'));
-tabPartners.addEventListener('click', ()=> { activateTab('partners'); renderPartners(); });
 tabAdmin.addEventListener('click', ()=> activateTab('admin'));
+tabPartners.addEventListener('click', ()=> activateTab('partners'));
 
 document.getElementById('btnToggleView').addEventListener('click', ()=> {
-  if (areaCalc.style.display !== 'block'){ activateTab('calc'); } else if (areaVehicles.style.display !== 'block'){ activateTab('vehicles'); } else if (areaOrders.style.display !== 'block'){ activateTab('orders'); } else activateTab('admin');
+  if (areaCalc.style.display !== 'block'){ activateTab('calc'); } else if (areaVehicles.style.display !== 'block'){ activateTab('vehicles'); } else if (areaOrders.style.display !== 'block'){ activateTab('orders'); } else if (areaPartners.style.display !== 'block'){ activateTab('partners'); } else activateTab('admin');
 });
 
-/* Utilities */
-function escapeHtml(str){
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-}
+/* Theme toggle (public) */
+document.getElementById('btnThemePurple').addEventListener('click', ()=>{
+  const body = document.body;
+  body.classList.toggle('purple-theme');
+  localStorage.setItem(KEY_THEME, body.classList.contains('purple-theme') ? 'purple' : 'default');
+});
 
-/* ---------- Init ---------- */
-function init(){
-  // data init
-  produtos = JSON.parse(localStorage.getItem(KEY_PRODUCTS) || JSON.stringify(DEFAULT));
-  vehicles = JSON.parse(localStorage.getItem(KEY_VEHICLES) || JSON.stringify(VEHICLES_DEFAULT));
-  orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
-
-  // ensure qts
-  produtos.forEach(p=> p.qtd = p.qtd || 0);
-  vehicles.forEach(v=> v.qtd = v.qtd || 0);
-
-  renderProducts();
-  renderVehicles();
-  populateVehicleSelect();
-  renderOrders();
-
-  // sparkles
-  const wrap = document.querySelector('.sparkles');
-  for (let i=0;i<14;i++){ const s = document.createElement('div'); s.className='spark'; s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%'; s.style.opacity = (0.02+Math.random()*0.12); s.style.width = (6+Math.random()*18)+'px'; s.style.height = s.style.width; wrap.appendChild(s); }
-
-  // restore admin UI if session active
-  if (sessionStorage.getItem('bennys_is_admin')){
-    document.getElementById('adminControls').style.display='block';
-    document.getElementById('btnLogout').style.display='inline-block';
-    document.getElementById('btnLogin').style.display='none';
-    document.getElementById('partnersAdminPanel').style.display='block';
+/* When user selects a car in the order select, sync qty to that vehicle's current qty (if set) */
+orderCarSelect.addEventListener('change', ()=>{
+  const selected = orderCarSelect.value;
+  if (!selected) { document.getElementById('orderQty').value = 1; return; }
+  const v = vehicles.find(x => x.nome === selected);
+  if (v) {
+    // if vehicle has a current qtd value (from the vehicle panel), use it; otherwise default 1
+    document.getElementById('orderQty').value = Math.max(1, v.qtd || 1);
+  } else {
+    document.getElementById('orderQty').value = 1;
   }
+});
 
+/* Init */
+function init(){
+  loadProducts(); loadVehicles(); loadOrders(); loadPartners();
+
+  if (sessionStorage.getItem('bennys_is_admin')){
+    document.getElementById('adminControls').style.display='block'; document.getElementById('btnLogout').style.display='inline-block'; document.getElementById('btnLogin').style.display='none';
+  }
   const seller = sessionStorage.getItem('bennys_seller');
   if (seller){
     sellerInfo.innerText = 'Logado como vendedor: ' + seller;
@@ -892,17 +853,22 @@ function init(){
     document.getElementById('sellerPass').style.display = 'none';
   }
 
-  // load partners and theme
-  renderPartners();
-  const theme = loadTheme();
-  if (theme === 'purple') applyTheme('purple');
+  const wrap = document.querySelector('.sparkles');
+  for (let i=0;i<12;i++){ const s = document.createElement('div'); s.className='spark'; s.style.left = Math.random()*100+'%'; s.style.top = Math.random()*100+'%'; s.style.opacity = (0.02+Math.random()*0.12); s.style.width = (6+Math.random()*18)+'px'; s.style.height = s.style.width; wrap.appendChild(s); }
 
-  // default tab
+  populateVehicleSelect();
   activateTab('calc');
+
+  // apply persisted theme if any
+  const savedTheme = localStorage.getItem(KEY_THEME);
+  if (savedTheme === 'purple') document.body.classList.add('purple-theme');
+
+  // ensure partners render respects admin state
+  renderPartners();
 }
 init();
 
-window.addEventListener('beforeunload', ()=> { localStorage.setItem(KEY_PRODUCTS, JSON.stringify(produtos)); localStorage.setItem(KEY_VEHICLES, JSON.stringify(vehicles)); localStorage.setItem(KEY_ORDERS, JSON.stringify(orders)); });
+window.addEventListener('beforeunload', ()=> { saveProducts(); saveVehicles(); saveOrders(); savePartners(); });
 
 </script>
 </body>
